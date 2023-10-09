@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Notes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px 0;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Ajouter une note</h2>
+        <input type="text" id="studentId" placeholder="ID Étudiant">
+        <input type="text" id="subject" placeholder="Matière">
+        <input type="text" id="score" placeholder="Note">
+        <button onclick="ajouterNote()">Ajouter</button>
+
+        <h2>Modifier une note</h2>
+        <input type="text" id="modifyStudentId" placeholder="ID Étudiant à modifier">
+        <input type="text" id="modifySubject" placeholder="Matière">
+        <input type="text" id="modifyScore" placeholder="Nouvelle Note">
+        <button onclick="modifierNote()">Modifier</button>
+
+        <h2>Liste des étudiants et leurs notes</h2>
+        <button onclick="fetchEtudiants()">Afficher la liste</button>
+        <table id="etudiantsTable">
+            <thead>
+                <tr>
+                    <th>ID Étudiant</th>
+                    <th>Matière</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les données seront insérées ici -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function ajouterNote() {
+            const studentId = document.getElementById('studentId').value;
+            const subject = document.getElementById('subject').value;
+            const score = document.getElementById('score').value;
+
+            fetch('http://localhost:3000/ajouter-note', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ studentId, subject, score }),
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => alert("Erreur lors de l'ajout de la note."));
+        }
+
+        function fetchEtudiants() {
+            fetch('http://localhost:3000/etudiants')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector('#etudiantsTable tbody');
+                tableBody.innerHTML = ''; // Reset the table content
+
+                data.etudiants.forEach(student => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = student.studentId;
+                    row.insertCell(1).textContent = student.subject;
+                    row.insertCell(2).textContent = student.score;
+                });
+            })
+            .catch(error => alert("Erreur lors de la récupération des données."));
+        }
+
+        function modifierNote() {
+            const studentId = document.getElementById('modifyStudentId').value;
+            const subject = document.getElementById('modifySubject').value;
+            const score = document.getElementById('modifyScore').value;
+
+            fetch(`http://localhost:3000/modifier-note/${studentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ subject, score }),
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => alert("Erreur lors de la modification de la note."));
+        }
+    </script>
+
+</body>
+
+</html>
